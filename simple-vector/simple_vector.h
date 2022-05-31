@@ -46,12 +46,7 @@ public:
 
     SimpleVector(std::initializer_list<Type> init) {
         ArrayPtr<Type> temp(init.size());
-        int counter = 0;
-
-        for (auto& element : init) {
-            temp[counter] = element;
-            ++counter;
-        }
+        std::copy(std::make_move_iterator(init.begin()), std::make_move_iterator(init.end()), temp.Get());
         vector_.swap(temp);
 
         size_ = init.size();
@@ -64,12 +59,7 @@ public:
 
     SimpleVector(const SimpleVector& other) {
         SimpleVector temp(other.GetSize());
-
-        int counter = 0;
-        for (auto& element : other) {
-            temp[counter] = element;
-            ++counter;
-        }
+        std::copy(std::make_move_iterator(other.begin()), std::make_move_iterator(other.end()), temp.begin());
         swap(temp);
     }
 
@@ -110,10 +100,12 @@ public:
     }
 
     Type& operator[](size_t index) noexcept {
+        assert(index < size_);
         return vector_[index];
     }
 
     const Type& operator[](size_t index) const noexcept {
+        assert(index < size_);
         return vector_[index];
     }
 
@@ -185,6 +177,7 @@ public:
     }
 
     Iterator Insert(ConstIterator pos, const Type& value) {
+        assert(pos >= begin() && pos <= end());
         int index = std::distance(cbegin(), pos);
         if (size_ == 0) {
             PushBack(value);
@@ -202,6 +195,7 @@ public:
     }
 
     Iterator Insert(ConstIterator pos, Type&& value) {
+        assert(pos >= begin() && pos <= end());
         int index = std::distance(cbegin(), pos);
         if (size_ == 0) {
             PushBack(std::move(value));
@@ -219,10 +213,12 @@ public:
     }
 
     void PopBack() noexcept {
+        assert(!IsEmpty());
         size_ -= size_ > 0 ? 1 : 0;
     }
 
     Iterator Erase(ConstIterator pos) {
+        assert(pos >= begin() && pos < end());
         if (pos == (end() - 1)) {
             PopBack();
             return end();
