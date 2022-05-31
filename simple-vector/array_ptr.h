@@ -42,7 +42,9 @@ public:
     }
 
     ArrayPtr& operator=(ArrayPtr&& other) {
-        raw_ptr_ = std::exchange(other.raw_ptr_, nullptr);
+        if (this != &other) {
+            std::swap(raw_ptr_, other.raw_ptr_);
+        }
         return *this;
     }
 
@@ -77,9 +79,7 @@ public:
 
     // Обменивается значениям указателя на массив с объектом other
     void swap(ArrayPtr& other) noexcept {
-        Type* temp = other.Get();
-        other.raw_ptr_ = raw_ptr_;
-        raw_ptr_ = temp;
+        std::swap(other.raw_ptr_, raw_ptr_);
     }
 
 private:
